@@ -1,1 +1,6 @@
 corpus/*.txt
+*.aux
+*.bbl
+*.blg
+*.log
+*.synctex.gz

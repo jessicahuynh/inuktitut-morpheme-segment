@@ -12,6 +12,10 @@ The test set will also be from the Nunavut Hansard and Inuktitut Bible.
 - corpus/
     - SentenceAligned.txt: version 2.0 of the Nunavut Hansard (too large for GitHub, download from link above)
 - Uqailaut.jar: the morphological analyzer
+- writeup/
+    - finalproject.tex: LaTeX file
+    - finalproject.pdf: PDF of the final report
+    - bib.bib: BibTeX bibliography
 
 ## How to run
 
