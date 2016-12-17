@@ -9,9 +9,13 @@ The test set will also be from the Nunavut Hansard and Inuktitut Bible.
 
 ## Project setup
 - README, .gitignore, etc
+- pipeline.sh: bash script that runs everything
+- Uqailaut.jar: the morphological analyzer
 - corpus/
     - SentenceAligned.txt: version 2.0 of the Nunavut Hansard (too large for GitHub, download from link above)
-- Uqailaut.jar: the morphological analyzer
+- data/
+- decompose/
+    - HansardDecompose.java: decomposes Inuktitut in Nunavut Hansard from SentenceAligned.txt
 - writeup/
     - finalproject.tex: LaTeX file
     - finalproject.pdf: PDF of the final report

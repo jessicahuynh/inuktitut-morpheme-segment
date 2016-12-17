@@ -4,3 +4,5 @@ corpus/*.txt
 *.blg
 *.log
 *.synctex.gz
+*.class
+*.pyc
