@@ -184,6 +184,8 @@ public class HansardDecompose {
                 }
                 String segmented = sb.toString();
                 buff.write(segmented.substring(0,segmented.length()-1));
+                System.out.println(word);
+                System.out.println(segmented.substring(0,segmented.length()-1));
             }
 
             buff.close();
