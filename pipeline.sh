@@ -1,8 +1,13 @@
 #!/bin/bash
 
 NUNAVUT_HANSARD="./corpus/SentenceAligned.txt"
+DECOMPOSITIONS="./data/morphemes.txt"
 
-# get data from corpus
-echo "Decomposing Hansard corpus to ./data/hansard.txt from $NUNAVUT_HANSARD"
-javac -classpath ./Uqailaut.jar decompose/HansardDecompose.java # decomposes Hansard corpus
-java -classpath . decompose.HansardDecompose $NUNAVUT_HANSARD
+# create necessary directories
+mkdir "data/"
+
+# get morpheme data
+echo "Decomposing Hansard corpus to $DECOMPOSITIONS from $NUNAVUT_HANSARD"
+javac decompose/HansardDecompose.java -Xlint:unchecked
+java decompose.HansardDecompose $NUNAVUT_HANSARD $DECOMPOSITIONS
+echo "Done with morphemes from Nunavut Hansard"
