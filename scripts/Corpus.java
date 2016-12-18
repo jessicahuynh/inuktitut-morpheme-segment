@@ -136,11 +136,8 @@ public class Corpus {
             case "text":
                 buildTextCorpus(testDir,trainDir,fileName+"-text");
                 break;
-            case "wordlist":
-                buildWordListCorpus();
-                break;
             case "annotation":
-                buildAnnotationCorpus();
+                buildAnnotationCorpus(trainDir,fileName+"-annotation");
                 break;
         }
     }
@@ -169,15 +166,86 @@ public class Corpus {
         createTrainTest(train,test,trainDir+fileName,testDir+fileName);
     }
 
-    private void buildWordListCorpus() throws IOException {
+    private void buildAnnotationCorpus(String trainDir, String fileName) throws IOException {
+        
+        // get types instead of tokens
+        HashMap<String,ArrayList<String>> wordAndAnnotations = new HashMap<String,ArrayList<String>>();
+        for (int i = 0; i < this.text.size(); i++) {
+            String[] currentLine = this.text.get(i).split(" ");
+            for (String w : currentLine) {
+                ArrayList<String> annotations = getMorphemesFromJar(w);
+                wordAndAnnotations.put(w,annotations);
+            }
+        }
 
+        // properly format lines for Morfessor annotation corpus
+        ArrayList<String> train = new ArrayList<String>();
+        for (String w : wordAndAnnotations.keySet()) {
+            ArrayList<String> annotations = wordAndAnnotations.get(w);
+            if (annotations.size() > 0) {
+                if (annotations.size() == 1) {
+                    train.add(w + " " + annotations.get(0));
+                }
+                else {
+                    String hypotheses = "";
+                    for (String a : annotations) {
+                        hypotheses += a + ", ";
+                    }
+                    hypotheses = hypotheses.substring(0,hypotheses.length() - 2);
+                    System.out.println(hypotheses);
+                    train.add(w + " " + hypotheses);
+                }
+            }
+        }
+        
+        createTrain(train,trainDir+fileName);
     }
 
-    private void buildAnnotationCorpus() throws IOException {
+    private ArrayList<String> getMorphemesFromJar(String word) throws IOException {
+        ArrayList<String> hypotheses = new ArrayList<String>();
+        try {
+            Runtime rt = Runtime.getRuntime();
+            String command = "java -jar ./Uqailaut.jar " + word;
+            Process proc = rt.exec(command);
 
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+            String s = null;
+            ArrayList<String> output = new ArrayList<String>();
+            
+            while ((s = stdInput.readLine()) != null) {
+                output.add(s);
+            }
+            if (!output.isEmpty()) {
+                Pattern m = Pattern.compile("\\{\\w+:");
+                for (String o : output) {
+                    Matcher matcher = m.matcher(o);
+                    String hypothesis = "";
+
+                    while (matcher.find()) {
+                        String morpheme = matcher.group();
+                        morpheme = morpheme.substring(1,morpheme.length()-1);
+                        hypothesis += morpheme + " ";
+                    }
+                    hypothesis = hypothesis.substring(0,hypothesis.length() - 1);
+
+                    hypotheses.add(hypothesis);
+                }
+            }
+            else {
+                return output;
+            }
+
+        }
+        catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return hypotheses;
     }
 
-    public static void createTrainTest(ArrayList<String> train, ArrayList<String> test, String trainPath, String testPath) throws IOException {
+    public static void createTrain(ArrayList<String> train, String trainPath) throws IOException {
         try {
             // train
             BufferedWriter trainWriter = new BufferedWriter(new FileWriter(trainPath));
@@ -185,6 +253,15 @@ public class Corpus {
                 trainWriter.write(line + "\n");
             }
             trainWriter.close();
+        }
+        catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void createTrainTest(ArrayList<String> train, ArrayList<String> test, String trainPath, String testPath) throws IOException {
+        try {
+            createTrain(train, trainPath);
 
             // test
             BufferedWriter testWriter = new BufferedWriter(new FileWriter(testPath));
@@ -215,10 +292,11 @@ public class Corpus {
                 }
             }
 
-            // tokenize and build models
+            // tokenize and create text to later build models
             for (Corpus corpus : corpora.values()) {
                 corpus.tokenizeCorpus();
                 corpus.splitTrainTest("text",args[2]);
+                corpus.splitTrainTest("annotation",args[2]);
             }
         }
     }
