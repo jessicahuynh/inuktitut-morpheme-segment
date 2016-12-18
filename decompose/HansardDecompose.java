@@ -159,7 +159,7 @@ public class HansardDecompose {
             String morpheme = matcher.group();
             morphemes.add(morpheme.substring(1,morpheme.length()-1));
         }
-
+        System.out.println(morphemes);
         return morphemes;
     }
 
