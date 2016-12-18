@@ -138,6 +138,7 @@ public class Corpus {
                 break;
             case "annotation":
                 buildAnnotationCorpus(trainDir,fileName+"-annotation");
+                buildAnnotationCorpus(testDir,fileName+"-gold"); // gold standard
                 break;
         }
     }
@@ -167,13 +168,31 @@ public class Corpus {
     }
 
     private void buildAnnotationCorpus(String trainDir, String fileName) throws IOException {
-        
+        int numLines = this.text.size();
+
+        int numTestLines = numLines / 5;
+        if (numLines <= 5) {
+            numTestLines = 1;
+        }
+
+        int j = 0;
+        int corpSize = 0;
+        if (trainDir.contains("test")) {
+            j = 0;
+            corpSize = numTestLines;
+        }
+        else {
+            j = numTestLines;
+            corpSize = numLines - 2;
+        }
+
         // get types instead of tokens
-        HashMap<String,ArrayList<String>> wordAndAnnotations = new HashMap<String,ArrayList<String>>();
-        for (int i = 0; i < this.text.size(); i++) {
-            String[] currentLine = this.text.get(i).split(" ");
+        // use HashSet for annotations to avoid multiple of the same morpheme segmentation
+        HashMap<String,HashSet<String>> wordAndAnnotations = new HashMap<String,HashSet<String>>();
+        for (int i = j; i <= corpSize; i++) {
+            String[] currentLine = this.text.get(i).split("\\s+");
             for (String w : currentLine) {
-                ArrayList<String> annotations = getMorphemesFromJar(w);
+                HashSet<String> annotations = getMorphemesFromJar(w);
                 wordAndAnnotations.put(w,annotations);
             }
         }
@@ -181,10 +200,14 @@ public class Corpus {
         // properly format lines for Morfessor annotation corpus
         ArrayList<String> train = new ArrayList<String>();
         for (String w : wordAndAnnotations.keySet()) {
-            ArrayList<String> annotations = wordAndAnnotations.get(w);
+            HashSet<String> annotations = wordAndAnnotations.get(w);
             if (annotations.size() > 0) {
                 if (annotations.size() == 1) {
-                    train.add(w + " " + annotations.get(0));
+                    String h = "";
+                    for (String a : annotations) {
+                        h += a;
+                    }
+                    train.add(w + " " + h);
                 }
                 else {
                     String hypotheses = "";
@@ -192,7 +215,7 @@ public class Corpus {
                         hypotheses += a + ", ";
                     }
                     hypotheses = hypotheses.substring(0,hypotheses.length() - 2);
-                    System.out.println(hypotheses);
+
                     train.add(w + " " + hypotheses);
                 }
             }
@@ -201,8 +224,8 @@ public class Corpus {
         createTrain(train,trainDir+fileName);
     }
 
-    private ArrayList<String> getMorphemesFromJar(String word) throws IOException {
-        ArrayList<String> hypotheses = new ArrayList<String>();
+    private HashSet<String> getMorphemesFromJar(String word) throws IOException {
+        HashSet<String> hypotheses = new HashSet<String>();
         try {
             Runtime rt = Runtime.getRuntime();
             String command = "java -jar ./Uqailaut.jar " + word;
@@ -212,7 +235,7 @@ public class Corpus {
             BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 
             String s = null;
-            ArrayList<String> output = new ArrayList<String>();
+            HashSet<String> output = new HashSet<String>();
             
             while ((s = stdInput.readLine()) != null) {
                 output.add(s);
@@ -282,11 +305,11 @@ public class Corpus {
         else {
             // create Corpus objects
             HashMap<String,Corpus> corpora = new HashMap<String,Corpus>();
-            corpora.put(args[0], new Corpus(args[0],false));
+            corpora.put(args[1], new Corpus(args[1],false)); // Nunavut Hansard
 
             // bible corpora
-            if (args[1] != null) {
-                File bibleDir = new File(args[1]);
+            if (args[2] != null) {
+                File bibleDir = new File(args[2]);
                 for (File bibleChapter : bibleDir.listFiles()) {
                     corpora.put(bibleChapter.toString(),new Corpus(bibleChapter.toString(),true));
                 }
@@ -295,8 +318,8 @@ public class Corpus {
             // tokenize and create text to later build models
             for (Corpus corpus : corpora.values()) {
                 corpus.tokenizeCorpus();
-                corpus.splitTrainTest("text",args[2]);
-                corpus.splitTrainTest("annotation",args[2]);
+                corpus.splitTrainTest("text",args[0]);
+                corpus.splitTrainTest("annotation",args[0]);
             }
         }
     }

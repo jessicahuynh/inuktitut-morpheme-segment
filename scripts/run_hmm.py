@@ -1,21 +1,24 @@
 import morfessor
 import nltk
+import sys
 
 class RunMorfessor():
     u"""Training and decoding using Morfessor"""
     
-    def __init__(self, unsuper_file, semisuper_file):
+    unsupervised = None
+    semisupervised = None
+    tokens = []
+    io = None
+    
+    def __init__(self, unsuper_file, semisuper_file,acw):
         self.io = morfessor.MorfessorIO()
 
         # build models
-        unsupervised = morfessor.baseline.BaselineModel()
-        compounds = list(self.io.read_corpus_file(unsuper_file))
-        self.unsupervised.load_data(compounds)
+        self.unsupervised = self.io.read_binary_model_file(unsuper_file)
 
-        semisupervised = morfessor.baseline.BaselineModel()
-        annotations = list(self.io.read_annotations_file(semisuper_file))
-        semisupervised.load_data(compounds)
-        self.semisupervised.set_annotations(annotations)
+        self.semisupervised = self.io.read_binary_model_file(unsuper_file)
+        annotations = dict(self.io.read_annotations_file(semisuper_file))
+        self.semisupervised.set_annotations(annotations,acw)
     
     def train_batch_recursive(self):
         """batch training on given model files with recursive algorithm"""
@@ -34,19 +37,24 @@ class RunMorfessor():
     
     def decode_unsupervised(self):
         for token in self.tokens:
-            print(self.unsupervised.viterbi_segment(token))
+            print(self.unsupervised.viterbi_segment(token)[0])
 
 
 
-def evaluate(self,gold_data,models):
+def evaluate(self,gold_data,morf):
     gold = self.io.read_annotations_file(gold_data)
     ev = morfessor.MorfessorEvaluation(gold)
+
+    models = [morf.unsupervised, morf.semisupervised]
 
     for m in models:
         ev.evaluate_model(m)
 
 if __name__ == '__main__':
-    hansard = RunMorfessor('data/train/NunavutHansard-text','data/train/NunavutHansard-annotation')
+    m = RunMorfessor(sys.argv[1],sys.argv[2],0.0)
 
-    hansard.train_batch_recursive()
-    hansard.read_testset('data/test/exodus-text')
+    m.train_batch_recursive()
+    m.read_testset(sys.argv[3])
+    m.decode_unsupervised()
+
+    evaluate(sys.argv[4],m)

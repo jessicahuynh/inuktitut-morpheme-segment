@@ -16,10 +16,13 @@ The test set will also be from the Nunavut Hansard and Inuktitut Bible.
     - bible/
         - genesis.txt
         - exodus.txt
+- scripts/
+    - Corpus.java
+    - run_hmm.py
 - data/
-    - Corpus.java: constructs train and test sets for the different models
     - train/
     - test/
+- models/
 - writeup/
     - finalproject.tex: LaTeX file
     - finalproject.pdf: PDF of the final report

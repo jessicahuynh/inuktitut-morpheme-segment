@@ -8,6 +8,8 @@ TEST_DIR="test/"
 TRAIN_DIR="train/"
 MODEL_DIR="./models"
 
+MODEL_BIBLE="$MODEL_DIR/bible.bin"
+
 # create necessary directories
 mkdir $DATA_DIR
 mkdir "$DATA_DIR$TEST_DIR"
@@ -16,11 +18,14 @@ mkdir $MODEL_DIR
 
 # making data sets
 echo "Creating data sets"
-javac scripts/Corpus.java -Xlint:unchecked
-java scripts.Corpus $NUNAVUT_HANSARD $BIBLE_DIR $DATA_DIR
+# javac scripts/Corpus.java -Xlint:unchecked
+# java scripts.Corpus $DATA_DIR $NUNAVUT_HANSARD $BIBLE_DIR
 echo "Done with making data sets"
 
 # build, train, decode, and evaluate
+echo "Building models"
+morfessor -t "data/train/genesis-text" -s $MODEL_BIBLE
+
 echo "Running python scripts/run_hmm.py"
-python scripts/run_hmm.py
+python scripts/run_hmm.py $MODEL_BIBLE "data/train/genesis-annotation" "data/test/genesis-text" "data/test/genesis-gold"
 
