@@ -11,6 +11,10 @@ mkdir "$DATA_DIR/train/"
 
 # making data sets
 echo "Creating data sets"
-javac data/Corpus.java -Xlint:unchecked
-java data.Corpus $NUNAVUT_HANSARD $BIBLE_DIR $DATA_DIR
+javac scripts/Corpus.java -Xlint:unchecked
+java scripts.Corpus $NUNAVUT_HANSARD $BIBLE_DIR $DATA_DIR
 echo "Done with making data sets"
+
+# build some models
+
+# train some HMMs

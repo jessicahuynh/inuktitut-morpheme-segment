@@ -1,4 +1,4 @@
-package data;
+package scripts;
 
 import java.util.*;
 import java.util.regex.*;
@@ -121,10 +121,20 @@ public class Corpus {
     public void splitTrainTest(String typeModel, String dir) throws IOException {
         String testDir = dir+"/test/";
         String trainDir = dir+"/train/";
+
+        String fileName = "";
+        if (this.path.contains("/")) {
+            String[] arr =  this.path.split(".txt")[0].split("/");
+            fileName = arr[arr.length - 1];
+        }
+        else {
+            String[] arr = this.path.split(".txt")[0].split("\\\\");
+            fileName = arr[arr.length - 1];
+        }
         
         switch (typeModel) {
             case "text":
-                buildTextCorpus(testDir,trainDir);
+                buildTextCorpus(testDir,trainDir,fileName+"-text");
                 break;
             case "wordlist":
                 buildWordListCorpus();
@@ -135,7 +145,7 @@ public class Corpus {
         }
     }
 
-    private void buildTextCorpus(String testDir, String trainDir) throws IOException {
+    private void buildTextCorpus(String testDir, String trainDir, String fileName) throws IOException {
         int numLines = this.text.size();
         
         int numTestLines = numLines / 5;
@@ -154,16 +164,6 @@ public class Corpus {
             else {
                 train.add(currentLine);
             }
-        }
-
-        String fileName = "";
-        if (this.path.contains("/")) {
-            String[] arr =  this.path.split(".txt")[0].split("/");
-            fileName = arr[arr.length - 1];
-        }
-        else {
-            String[] arr = this.path.split(".txt")[0].split("\\\\");
-            fileName = arr[arr.length - 1];
         }
         
         createTrainTest(train,test,trainDir+fileName,testDir+fileName);

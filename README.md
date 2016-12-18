@@ -14,10 +14,10 @@ The test set will also be from the Nunavut Hansard and Inuktitut Bible.
 - corpus/
     - NunavutHansard.txt: version 2.0 of the Nunavut Hansard (too large for GitHub, download from link above)
     - bible/
-        - exodus.txt
         - genesis.txt
+        - exodus.txt
 - data/
-    - Corpus.java
+    - Corpus.java: constructs train and test sets for the different models
     - train/
     - test/
 - writeup/
