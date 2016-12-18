@@ -1,13 +1,16 @@
 #!/bin/bash
 
-NUNAVUT_HANSARD="./corpus/SentenceAligned.txt"
-DECOMPOSITIONS="./data/morphemes.txt"
+NUNAVUT_HANSARD="./corpus/NunavutHansard.txt"
+BIBLE_DIR="./corpus/bible/"
+DATA_DIR="./data/"
 
 # create necessary directories
-mkdir "data/"
+mkdir $DATA_DIR
+mkdir "$DATA_DIR/test/"
+mkdir "$DATA_DIR/train/"
 
-# get morpheme data
-echo "Decomposing Hansard corpus to $DECOMPOSITIONS from $NUNAVUT_HANSARD"
-javac decompose/HansardDecompose.java -Xlint:unchecked
-java decompose.HansardDecompose $NUNAVUT_HANSARD $DECOMPOSITIONS
-echo "Done with morphemes from Nunavut Hansard"
+# making data sets
+echo "Creating data sets"
+javac data/Corpus.java -Xlint:unchecked
+java data.Corpus $NUNAVUT_HANSARD $BIBLE_DIR $DATA_DIR
+echo "Done with making data sets"
