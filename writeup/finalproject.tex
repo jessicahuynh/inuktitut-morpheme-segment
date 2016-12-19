@@ -70,19 +70,19 @@ While there are supposed to be some Java methods packaged within the .jar that c
 The NRC also has an Inuktitut transcoder, to transcode between Inuktitut syllabics and the Roman alphabet.\cite{transcoder}
 
 \subsection{Method}
-The GitHub repository for this project is at \url{https://www.github.com/jessicahuynh/inuktitut-morpheme-segment}. Broadly, there is a pipeline script, \texttt{pipeline.sh}, that runs everything.
+The GitHub repository for this project is at \url{https://www.github.com/jessicahuynh/inuktitut-morpheme-segment}. Broadly, there is a pipeline script, \texttt{pipeline.sh}, that prepares the data and models and runs the different experiments before evaluating them.
 
 \subsubsection{Creating test and train datasets}
 The file \texttt{scripts/Corpus.java} contains all the code to take in the various corpora, put them into the correct format to be read by Morfessor, and split them into training and test sets at about a 4:1 ratio.
 
-\subsubsection{Modelling}
+\subsubsection{Modeling}
 This part of the pipeline is relatively straightforward. Morfessor provides command line tools to take in a corpus and build a binary to be read in later for the model.
 
 \subsubsection{Training, decoding, and evaluation}
 The script \texttt{scripts/run\_hmm.py} does the training, decoding, and evaluation, all using Morfessor's built-in methods.
 
 \subsection{Approaches}
-Morfessor's primary mode of operation is to do unsupervised training, but I also opted to use its built-in methods to do some semi-supervised training and do some manual adjusting of the weights.
+Morfessor's primary mode of operation is to do unsupervised training, but I also opted to use its built-in methods to do some semi-supervised training with an additional annotated corpus (that is, one where the morpheme boundaries are already given) and do some manual adjusting of the weighting of the annotated corpus.
 
 \section{Results}
 

@@ -251,7 +251,9 @@ public class Corpus {
                         morpheme = morpheme.substring(1,morpheme.length()-1);
                         hypothesis += morpheme + " ";
                     }
-                    hypothesis = hypothesis.substring(0,hypothesis.length() - 1);
+                    if (hypothesis.length() > 2) {
+                        hypothesis = hypothesis.substring(0,hypothesis.length() - 1);
+                    }
 
                     hypotheses.add(hypothesis);
                 }

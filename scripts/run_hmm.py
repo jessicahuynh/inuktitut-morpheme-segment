@@ -53,7 +53,7 @@ def evaluate(gold_data,morf):
 
     models = [morf.unsupervised, morf.semisupervised]
 
-    config = morfessor.evaluation.EvaluationConfig(10,13)
+    config = morfessor.evaluation.EvaluationConfig(10,1000)
     results = [ev.evaluate_model(m,config) for m in models]
     
     wsr = morfessor.evaluation.WilcoxonSignedRank()
@@ -62,10 +62,13 @@ def evaluate(gold_data,morf):
     wsr.print_table(r)
 
 if __name__ == '__main__':
-    m = RunMorfessor(sys.argv[1],sys.argv[2],0.0)
+    weights = [0.0, 0.01, 0.1, 0.25, 0.5, 0.75, 0.8, 0.95, 1.0]
 
-    m.train_batch_recursive()
-    m.read_testset(sys.argv[3])
-    m.decode_unsupervised()
+    for w in weights:
+        m = RunMorfessor(sys.argv[1],sys.argv[2],w)
 
-    evaluate(sys.argv[4],m)
+        m.train_batch_recursive()
+        m.read_testset(sys.argv[3])
+        m.decode_unsupervised()
+
+        evaluate(sys.argv[4],m)
