@@ -318,7 +318,7 @@ public class Corpus {
             // tokenize and create text to later build models
             for (Corpus corpus : corpora.values()) {
                 corpus.tokenizeCorpus();
-                //corpus.splitTrainTest("text",args[0]);
+                corpus.splitTrainTest("text",args[0]);
                 corpus.splitTrainTest("annotation",args[0]);
             }
         }
