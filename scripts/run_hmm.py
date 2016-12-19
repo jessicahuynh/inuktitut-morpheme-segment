@@ -37,18 +37,29 @@ class RunMorfessor():
     
     def decode_unsupervised(self):
         for token in self.tokens:
-            print(self.unsupervised.viterbi_segment(token)[0])
+            morphemes = self.unsupervised.viterbi_segment(token)[0]
+            decomposed = ""
+            for morpheme in morphemes:
+                decomposed += morpheme + "+"
+            decomposed = decomposed[:-1]
+            print(token+": "+decomposed)
 
 
 
-def evaluate(self,gold_data,morf):
-    gold = self.io.read_annotations_file(gold_data)
+def evaluate(gold_data,morf):
+    io = morfessor.MorfessorIO()
+    gold = io.read_annotations_file(gold_data)
     ev = morfessor.MorfessorEvaluation(gold)
 
     models = [morf.unsupervised, morf.semisupervised]
 
-    for m in models:
-        ev.evaluate_model(m)
+    config = morfessor.evaluation.EvaluationConfig(10,13)
+    results = [ev.evaluate_model(m,config) for m in models]
+    
+    wsr = morfessor.evaluation.WilcoxonSignedRank()
+    r = wsr.significance_test(results)
+    print(r)
+    wsr.print_table(r)
 
 if __name__ == '__main__':
     m = RunMorfessor(sys.argv[1],sys.argv[2],0.0)
