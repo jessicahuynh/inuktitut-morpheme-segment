@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUNAVUT_HANSARD="./corpus/NunavutHansard.txt"
+NUNAVUT_HANSARD="./corpus/NunavutHansard-sm.txt"
 BIBLE_DIR="./corpus/bible/"
 
 DATA_DIR="./data/"
@@ -19,14 +19,15 @@ mkdir $MODEL_DIR
 
 # making data sets
 echo "Creating data sets"
+python scripts/make_small.py
 javac scripts/Corpus.java -Xlint:unchecked
 java scripts.Corpus $DATA_DIR $NUNAVUT_HANSARD
 echo "Done with making data sets"
 
 # build, train, decode, and evaluate
 echo "Building models"
-morfessor -t "data/train/NunavutHansard-text" -s $MODEL_BIBLE
+morfessor -t "data/train/NunavutHansard-sm-text" -s $MODEL_HANSARD
 
 echo "Running python scripts/run_hmm.py"
-python scripts/run_hmm.py $MODEL_HANSARD "data/train/NunavutHansard-annotation" "data/test/NunavutHansard-text" "data/test/NunavutHansard-gold"
+python scripts/run_hmm.py $MODEL_HANSARD "data/train/NunavutHansard-sm-annotation" "data/test/NunavutHansard-sm-text" "data/test/NunavutHansard-sm-gold"
 

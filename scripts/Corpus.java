@@ -52,10 +52,9 @@ public class Corpus {
 
         ArrayList<String> cleanCorpus = new ArrayList<String>();
         BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
-
         String line = null;
         while ((line = reader.readLine()) != null) {
-            if (line.startsWith("*")) {
+            if (line.contains("*")) {
                 String inuktitut = reader.readLine();
                 cleanCorpus.add(inuktitut);
             }
@@ -153,7 +152,7 @@ public class Corpus {
         
         // build sets in arraylists
         ArrayList<String> test = new ArrayList<String>(numTestLines);
-        ArrayList<String> train = new ArrayList<String>(numLines - numTestLines);
+        ArrayList<String> train = new ArrayList<String>();
         for (int i = 0; i < numLines; i++) {
             String currentLine = this.text.get(i);
             if (i <= numTestLines) {
@@ -191,9 +190,11 @@ public class Corpus {
         HashMap<String,HashSet<String>> wordAndAnnotations = new HashMap<String,HashSet<String>>();
         for (int i = j; i <= corpSize; i++) {
             String[] currentLine = this.text.get(i).split("\\s+");
-            for (String w : currentLine) {
-                HashSet<String> annotations = getMorphemesFromJar(w);
-                wordAndAnnotations.put(w,annotations);
+            if (currentLine.length > 0) {
+                for (String w : currentLine) {
+                    HashSet<String> annotations = getMorphemesFromJar(w);
+                    wordAndAnnotations.put(w,annotations);
+                }
             }
         }
 
