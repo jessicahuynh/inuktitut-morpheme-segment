@@ -13,6 +13,8 @@
 \usepackage{enumitem}
 \setlist{nolistsep}
 
+\usepackage{hyperref}
+
 \usepackage{multirow}
 \usepackage{wrapfig}
 
@@ -21,8 +23,8 @@
 
 \pagestyle{fancy}
 \fancyhead[L]{Jessica Huynh}
-\fancyhead[C]{Statistical Approaches to Natural Language Processing}
-\fancyhead[R]{Final project}
+\fancyhead[C]{Statistical Morpheme Segmentation in Inuktitut}
+\fancyhead[R]{StatNLP final project}
 \fancyfoot[C]{\thepage}
 
 \title{Statistical morpheme segmentation in Inuktitut}
@@ -42,17 +44,45 @@ Inuktitut is an Inuit language spoken mostly in Canada, and like many other Eski
 The highly regular nature of Inuktitut morphology means that one can write a rule-based morpheme segmenter with relatively high accuracy. Indeed, the National Research Council of Canada has already built one, claiming over 95\% accuracy on the Nunavut Hansard corpus and similar accuracy on Inuktitut web pages, composing a list of thousands of roots and suffixes to do so.\cite{analyzer}
 
 \section{Experiment}
-Morfessor\cite{morfessor} is a package of 
-
-\subsection{Method}
-\cite{morfessor}
-
-\subsection{Approaches}
 
 \subsection{Corpora}
-For the corpora, I used the Nunavut Hansard corpus\cite{hansard}
+For the main corpus, I used the Inuktitut language portions of the Nunavut Hansard.\cite{hansard} The data in the hansard is formatted as such:
+
+\texttt{~\\***************\\qinuvvigijumavakka pigiaqtitsiqqaujuq aippiiqqaujurlu pigiaqtitauqqaujumut tasiqsiqullugit uqaqtimik uqaqtiup iksivautangannut.\\-----\\I would ask that the mover and the seconder of the motion escort the Honourable Speaker to the Speaker's chair.\\***************\\~}
+
+As such, it was a relatively simple task to extract just the Inuktitut portions.
+
+For a secondary corpus, I used portions of the Inuktitut Bible, which was completely translated by the Canadian Bible Society in 2012.\cite{bible} The text is in syllabics, so to make it easier to work with, I used the National Research Council of Canada's Inuktitut transcoder to get a Latin alphabet transcription. For those characters it did not successfully transliterate (namely, those oriented facing upwards and with a dot for a long vowel), I used a syllabary resource\cite{syllabics} and did the substitution in a text editor myself. The syllabics that needed manual substitution are in \texttt{syllabics.txt}.
 
 \subsection{Tools}
+
+\subsubsection{Morfessor}
+Morfessor\cite{morfessor} is a package of machine learning methods designed for segmentation tasks, provided as both command-line and a Python package.
+
+Morfessor considers morphemes separate from \emph{morphs}, which could be considered like the surface representation of a morpheme, being the word segments in the data. At its core, Morfessor treats each word as a Hidden Markov Model, with the morphs as a sequence of observations. The hidden states are categories of morphs.\cite{formula}
+
+\subsubsection{Morphological analyzer}
+The National Research Council of Canada (NRC) has the Uqailaut project, a rule-based morphological analyzer for Inuktitut.\cite{analyzer} It is provided as a Java .jar file to download and in this project provides the `ground truth' for the test sets, as well as the annotated data used to bootstrap some of the models.
+
+While there are supposed to be some Java methods packaged within the .jar that can be incorporated into other programs, in practice I couldn't get this to work and instead just grabbed the output of the .jar for each word I wanted the morpheme breakdown for.\cite{exec_cmd_java}
+
+\subsubsection{Transcoder}
+The NRC also has an Inuktitut transcoder, to transcode between Inuktitut syllabics and the Roman alphabet.\cite{transcoder}
+
+\subsection{Method}
+The GitHub repository for this project is at \url{https://www.github.com/jessicahuynh/inuktitut-morpheme-segment}. Broadly, there is a pipeline script, \texttt{pipeline.sh}, that runs everything.
+
+\subsubsection{Creating test and train datasets}
+The file \texttt{scripts/Corpus.java} contains all the code to take in the various corpora, put them into the correct format to be read by Morfessor, and split them into training and test sets at about a 4:1 ratio.
+
+\subsubsection{Modelling}
+This part of the pipeline is relatively straightforward. Morfessor provides command line tools to take in a corpus and build a binary to be read in later for the model.
+
+\subsubsection{Training, decoding, and evaluation}
+The script \texttt{scripts/run\_hmm.py} does the training, decoding, and evaluation, all using Morfessor's built-in methods.
+
+\subsection{Approaches}
+Morfessor's primary mode of operation is to do unsupervised training, but I also opted to use its built-in methods to do some semi-supervised training and do some manual adjusting of the weights.
 
 \section{Results}
 

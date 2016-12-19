@@ -9,6 +9,7 @@ TRAIN_DIR="train/"
 MODEL_DIR="./models"
 
 MODEL_BIBLE="$MODEL_DIR/bible.bin"
+MODEL_HANSARD="$MODEL_DIR/hansard.bin"
 
 # create necessary directories
 mkdir $DATA_DIR
@@ -19,7 +20,7 @@ mkdir $MODEL_DIR
 # making data sets
 echo "Creating data sets"
 javac scripts/Corpus.java -Xlint:unchecked
-java scripts.Corpus $DATA_DIR $NUNAVUT_HANSARD $BIBLE_DIR
+java scripts.Corpus $DATA_DIR $NUNAVUT_HANSARD
 echo "Done with making data sets"
 
 # build, train, decode, and evaluate
@@ -27,5 +28,5 @@ echo "Building models"
 morfessor -t "data/train/NunavutHansard-text" -s $MODEL_BIBLE
 
 echo "Running python scripts/run_hmm.py"
-python scripts/run_hmm.py $MODEL_BIBLE "data/train/NunavutHansard-annotation" "data/test/NunavutHansard-text" "data/test/NunavutHansard-gold"
+python scripts/run_hmm.py $MODEL_HANSARD "data/train/NunavutHansard-annotation" "data/test/NunavutHansard-text" "data/test/NunavutHansard-gold"
 

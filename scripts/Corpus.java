@@ -308,7 +308,7 @@ public class Corpus {
             corpora.put(args[1], new Corpus(args[1],false)); // Nunavut Hansard
 
             // bible corpora
-            if (args[2] != null) {
+            if (args.length == 3) {
                 File bibleDir = new File(args[2]);
                 for (File bibleChapter : bibleDir.listFiles()) {
                     corpora.put(bibleChapter.toString(),new Corpus(bibleChapter.toString(),true));
@@ -318,7 +318,7 @@ public class Corpus {
             // tokenize and create text to later build models
             for (Corpus corpus : corpora.values()) {
                 corpus.tokenizeCorpus();
-                corpus.splitTrainTest("text",args[0]);
+                //corpus.splitTrainTest("text",args[0]);
                 corpus.splitTrainTest("annotation",args[0]);
             }
         }

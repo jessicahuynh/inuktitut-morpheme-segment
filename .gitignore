@@ -6,3 +6,4 @@ corpus/*.txt
 *.synctex.gz
 *.class
 *.pyc
+*.out
