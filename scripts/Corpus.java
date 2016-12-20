@@ -70,13 +70,16 @@ public class Corpus {
         ArrayList<String> currentCorpus = this.text;
         for (String line : currentCorpus) {
             String tempLine = "";
-            String[] words = line.split("[\\p{IsPunctuation}\\p{IsWhite_Space}]");
-            for (String w : words) {
-                tempLine += cleanWord(w);
+            if (line!=null) {
+                String[] words = line.split("[\\p{IsPunctuation}\\p{IsWhite_Space}]");
+                for (String w : words) {
+                    tempLine += cleanWord(w);
+                }
+                if (tempLine.length() > 1) {
+                    tokenizedCorpus.add(tempLine.trim());
+                }
             }
-            if (tempLine.length() > 1) {
-                tokenizedCorpus.add(tempLine.trim());
-            }
+            
         }
 
         this.text = tokenizedCorpus;
@@ -308,7 +311,7 @@ public class Corpus {
         else {
             // create Corpus objects
             HashMap<String,Corpus> corpora = new HashMap<String,Corpus>();
-            corpora.put(args[1], new Corpus(args[1],false)); // Nunavut Hansard
+            //corpora.put(args[1], new Corpus(args[1],false)); // Nunavut Hansard
 
             // bible corpora
             if (args.length == 3) {
