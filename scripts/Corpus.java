@@ -311,7 +311,7 @@ public class Corpus {
         else {
             // create Corpus objects
             HashMap<String,Corpus> corpora = new HashMap<String,Corpus>();
-            //corpora.put(args[1], new Corpus(args[1],false)); // Nunavut Hansard
+            corpora.put(args[1], new Corpus(args[1],false)); // Nunavut Hansard
 
             // bible corpora
             if (args.length == 3) {

@@ -46,13 +46,13 @@ The highly regular nature of Inuktitut morphology means that one can write a rul
 \section{Experiment}
 
 \subsection{Corpora}
-For the main corpus, I used the Inuktitut language portions of the Nunavut Hansard.\cite{hansard} The data in the hansard is formatted as such:
+For the main corpus, I was originally going to use the Inuktitut language portions of the Nunavut Hansard.\cite{hansard} The data in the hansard is formatted as such:
 
 \texttt{~\\***************\\qinuvvigijumavakka pigiaqtitsiqqaujuq aippiiqqaujurlu pigiaqtitauqqaujumut tasiqsiqullugit uqaqtimik uqaqtiup iksivautangannut.\\-----\\I would ask that the mover and the seconder of the motion escort the Honourable Speaker to the Speaker's chair.\\***************\\~}
 
-As such, it was a relatively simple task to extract just the Inuktitut portions. I opted to only take the first 25,000 lines or so, to keep the size manageable.
+As such, it was a relatively simple task to extract just the Inuktitut portions. I opted to only take the first 25,000 lines or so, to keep the size manageable. However, the model still took too long to build, so I switched to using a much smaller corpus instead. In the future, if I had more time, I would try to use this corpus.
 
-For a secondary corpus, I used portions of the Inuktitut Bible, which was completely translated by the Canadian Bible Society in 2012.\cite{bible} The text is in syllabics, so to make it easier to work with, I used the National Research Council of Canada's Inuktitut transcoder to get a Latin alphabet transcription. For those characters it did not successfully transliterate (namely, those oriented facing upwards and with a dot for a long vowel), I used a syllabary resource\cite{syllabics} and did the substitution in a text editor myself. The syllabics that needed manual substitution are in \texttt{syllabics.txt}.
+For the secondary corpus, I used portions of the Inuktitut Bible, which was completely translated by the Canadian Bible Society in 2012.\cite{bible} The text is in syllabics, so to make it easier to work with, I used the National Research Council of Canada's Inuktitut transcoder to get a Latin alphabet transcription. For those characters it did not successfully transliterate (namely, those oriented facing upwards and with a dot for a long vowel), I used a syllabary resource\cite{syllabics} and did the substitution in a text editor myself. The syllabics that needed manual substitution are in \texttt{syllabics.txt}.
 
 \subsection{Tools}
 
@@ -82,13 +82,54 @@ This part of the pipeline is relatively straightforward. Morfessor provides comm
 The script \texttt{scripts/run\_hmm.py} does the training, decoding, and evaluation, all using Morfessor's built-in methods.
 
 \subsection{Approaches}
-Morfessor's primary mode of operation is to do unsupervised training, but I also opted to use its built-in methods to do some semi-supervised training with an additional annotated corpus (that is, one where the morpheme boundaries are already given) and do some manual adjusting of the weighting of the annotated corpus.
+Morfessor's primary mode of operation is to do unsupervised training, but I also opted to use its built-in methods to do some semi-supervised training with an additional annotated corpus (that is, one where the morpheme boundaries are already given) and do some manual adjusting of the weighting of the annotated corpus. The weights balance the costs of the corpora.
+
+I kept the training and test set, along with the annotations, consistent throughout all of my runs.
+
+When building the model, it took 10-11 epochs depending on the run, with training done in under 15 seconds usually. The training was all batch training with the recursive algorithm. Decoding was Viterbi.
+
+Because of the lack of data, I opted for the evaluation to do its sampling on the test set with ten samples of twenty words each.
 
 \section{Results}
+\begin{center}
+	\begin{tabular}{l | r r r}
+		File name & F-measure & Precision & Recall\\\hline\hline
+		Unsupervised & 0.328 & \textbf{0.768} & 0.216 \\
+		Semisupervised weight 0.0 & 0.350 & 0.695 & 0.237 \\
+		Semisupervised weight 0.1 & 0.381 & 0.663 & 0.28 \\
+		Semisupervised weight 0.25 & 0.380 & 0.528 & 0.31 \\
+		Semisupervised weight 0.5 & \textbf{0.447} & 0.427 & 0.486 \\
+		Semisupervised weight 0.75 & 0.414 & 0.358 & 0.504 \\
+		Semisupervised weight 0.95 & 0.411 & 0.354 & 0.493 \\
+		Semisupervised weight 1.0 & 0.387 & 0.329 & 0.482 \\
+		Semisupervised weight 2.0 & 0.413 & 0.350 & 0.515 \\
+		Semisupervised weight 2.5 & 0.429 & 0.355 & 0.551 \\
+		Semisupervised weight 5.0 & 0.403 & 0.323 & 0.551 \\
+		Semisupervised weight 7.5 & 0.426 & 0.351 & \textbf{0.555} \\
+		Semisupervised weight 10.0 & 0.381 & 0.315 & 0.491\\
+	\end{tabular}
+\end{center}
+
+None of the results from the different experiments were especially great. 
+
+The unsupervised approach had by far the best results when it came to precision, meaning it had a higher percentage of relevant morpheme segments among the morpheme segments it picked out.
+
+Recall was not very good for any of the results, meaning that not many relevant morpheme segments were produced. The best was the semisupervised experiment with a weight of 7.5, which still only had a recall of 0.555.
+
+The F-measure, taking both precision and recall into account, puts the experiment with the best results as semisupervised with a weight of 0.5.
 
 \section{Discussion}
+In general, it looks like factoring in already annotated segmentatinos improves the number of relevant morpheme segments at the cost of the ratio of actually relevant segmentations, although none of the results are fantastic.
+
+Part of the reason for this is the small dataset I ended up using, parts of the first two books of the Inuktitut Bible instead of the Nunavut Hansard, purely for the sake of time. With more data, the algorithm would be able to segment better. As is, the data is really sparse. There is just not much overlap between the training and test sets token-wise due to the nature of the language.
+
+In the \texttt{results/} directory are the hypothesized segmentations for each experiment. A lot of the more common morphemes were segmented out, such as \textit{-(i)llu}, \textit{-up}, and \textit{-lu}. Many of the words, however, aren't even segmented and sometimes those that are are segmented over-enthusiastically, such as \textit{tama+k+k+uni+nga} for \textit{tamakkuninga} in the semisupervised weighted 7.5 results.
+
+
+If I had additional time, I would also see what results online and online+batch training would give, in addition to training with Viterbi.
 
 \section{Conclusion}
+My attempts at statistical morpheme segmentation of Inuktitut with HMMs (through the Morfessor package) and a relative lack of data produced bad-to-mediocre results. Increasing the amount of training data would help quite a bit. As is, between a statistical segmentation with a small dataset and a rule-based one, for a language with as regular a morphology as Inuktitut, I would take the rule-based segmenter.
 
 \pagebreak
 \bibliography{bib}
